@@ -10,17 +10,48 @@ const db = mysql.createConnection({
 });
 
 // Connect to Database
-db.connect((error) => {
-    if (error) {
-        throw error;
-    }
-    console.log("MySql Connected!");
-});
+db.connect((error) => { if (error) throw error; });
 
 const app = express();
-const port = '3000';
+app.use(express.json());
+const PORT = '3000';
 
-// Starting Server
-app.listen(port, () => {
-    console.log('Server started on port ' + port);
+// Routes
+app.post('/createtable', (req, res) => {
+    let newQuery = '';
+    try {
+        const rows = req.body.rows.reduce( (rows = '', row) =>  rows + ', ' + row );
+        newQuery = 'CREATE TABLE IF NOT EXISTS ' + req.body.tableName + ' (' + rows + ');';
+    } catch (error) {
+        res.send(error.message);
+    }
+    db.query(newQuery, (error, result) => {
+        if(error) throw error;
+        res.send(true);
+    });
 });
+
+app.post('/insertinto', (req, res) => {
+    let newQuery = '';
+    try {
+        const values = req.body.values.reduce( (values = '', value) =>  values + ', ' + value );
+        newQuery = 'INSERT INTO ' + req.body.tableName + ' VALUES ' + values + ';';
+    } catch (error) {
+        res.send(error.message);
+    }
+    db.query(newQuery, (error, result) => {
+        if(error) throw error;
+        res.send(true);
+    });
+});
+
+app.get('/pastes', (req, res) => {
+    const newQuery = 'SELECT * FROM pastes;';
+    db.query(newQuery, (error, result) => {
+        if(error) throw error;
+        res.send(result);
+    });
+});
+
+// Start Server
+app.listen(PORT);
