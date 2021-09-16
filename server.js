@@ -21,7 +21,11 @@ app.post('/createtable', (req, res) => {
     let newQuery = '';
     try {
         const rows = req.body.rows.reduce( (rows = '', row) =>  rows + ', ' + row );
-        newQuery = 'CREATE TABLE IF NOT EXISTS ' + req.body.tableName + ' (' + rows + ');';
+        newQuery = 'CREATE TABLE IF NOT EXISTS ' + 
+                    req.body.tableName + 
+                    ' (' + 
+                    rows + 
+                    ');';
     } catch (error) {
         res.send(error.message);
     }
@@ -35,7 +39,11 @@ app.post('/insertinto', (req, res) => {
     let newQuery = '';
     try {
         const values = req.body.values.reduce( (values = '', value) =>  values + ', ' + value );
-        newQuery = 'INSERT INTO ' + req.body.tableName + ' VALUES ' + values + ';';
+        newQuery = 'INSERT INTO ' + 
+                    req.body.tableName + 
+                    ' VALUES ' + 
+                    values + 
+                    ';';
     } catch (error) {
         res.send(error.message);
     }
@@ -45,8 +53,20 @@ app.post('/insertinto', (req, res) => {
     });
 });
 
-app.get('/pastes', (req, res) => {
-    const newQuery = 'SELECT * FROM pastes;';
+app.get('/selectdata', (req, res) => {
+    let newQuery;
+    try {
+        const arguments = req.body.arguments.reduce( (argumentsList = '', argument) =>  argumentsList + ', ' + argument );
+        newQuery = 'SELECT ' + arguments + 
+                    ' FROM ' + 
+                    req.body.tableName + 
+                    ' ' + 
+                    req.body.specifications + 
+                    ';';
+
+    } catch (error) {
+        res.send(error.message);
+    }
     db.query(newQuery, (error, result) => {
         if(error) throw error;
         res.send(result);
