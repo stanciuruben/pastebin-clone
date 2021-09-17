@@ -4,8 +4,6 @@ const mysql = require('mysql');
 // Create Connection
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'user',
-    password: 'anypassword',
     database: 'pastebin-clone'
 });
 
@@ -16,26 +14,26 @@ const app = express();
 app.use(express.json());
 const PORT = '3000';
 
+app. use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'POST, GET');
+    next();
+});
+
+
 // Routes
-app.post('/createtable', (req, res) => {
-    let newQuery = '';
-    try {
-        const rows = req.body.rows.reduce( (rows = '', row) =>  rows + ', ' + row );
-        newQuery = 'CREATE TABLE IF NOT EXISTS ' + 
-                    req.body.tableName + 
-                    ' (' + 
-                    rows + 
-                    ');';
-    } catch (error) {
-        res.send(error.message);
-    }
+app.post('/createPastesTable', (req, res) => {
+    console.log('CREATING TABLE....');
+    const newQuery = "CREATE TABLE IF NOT EXISTS pastes ( title VARCHAR(50), text VARCHAR(10000) );";
     db.query(newQuery, (error, result) => {
         if(error) throw error;
-        res.send(true);
+        res.send('success');
     });
 });
 
-app.post('/insertinto', (req, res) => {
+app.post('/insertInto', (req, res) => {
+    console.log('INSERTING INTO > DATABASE');
     let newQuery = '';
     try {
         const values = req.body.values.reduce( (values = '', value) =>  values + ', ' + value );
@@ -49,24 +47,17 @@ app.post('/insertinto', (req, res) => {
     }
     db.query(newQuery, (error, result) => {
         if(error) throw error;
-        res.send(true);
+        res.send('success');
     });
 });
 
-app.get('/selectdata', (req, res) => {
-    let newQuery;
-    try {
-        const arguments = req.body.arguments.reduce( (argumentsList = '', argument) =>  argumentsList + ', ' + argument );
-        newQuery = 'SELECT ' + arguments + 
+app.get('/selectData', (req, res) => {
+    const newQuery = 'SELECT ' + req.body.argument + 
                     ' FROM ' + 
                     req.body.tableName + 
                     ' ' + 
                     req.body.specifications + 
                     ';';
-
-    } catch (error) {
-        res.send(error.message);
-    }
     db.query(newQuery, (error, result) => {
         if(error) throw error;
         res.send(result);
